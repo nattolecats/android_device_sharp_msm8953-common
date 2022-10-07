@@ -122,7 +122,6 @@ persist.radio.flexmap_type=nw_mode
 persist.radio.oem_socket=true
 persist.radio.qcom_ext_enable=true
 persist.vendor.data.mode=concurrent
-persist.vendor.radio.atfwd.start=true
 persist.vendor.radio.cs_srv_type=1
 persist.vendor.radio.custom_ecc=1
 persist.vendor.radio.lte_vrte_ltd=1
