@@ -1,6 +1,6 @@
 #! /vendor/bin/sh
 
-# Copyright (c) 2012-2013,2016,2018,2019 The Linux Foundation. All rights reserved.
+# Copyright (c) 2012-2013,2016,2018-2020 The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -262,10 +262,11 @@ case "$target" in
                     log -t BOOT -p i "SDM429 early_boot prop set for: HwID '$soc_hwid'"
                 fi
                 ;;
-            303|307|308|309|320)
+            303|307|308|309|320|386|436)
                 # Vulkan is not supported for 8917 variants
                 setprop vendor.opengles.version 196608
                 setprop persist.graphics.vulkan.disable true
+                setprop vendor.gralloc.disable_ahardware_buffer 1
                 ;;
             *)
                 setprop vendor.opengles.version 196608
@@ -282,7 +283,6 @@ case "$target" in
     "msm8998" | "apq8098_latv")
         case "$soc_hwplatform" in
             *)
-                setprop vendor.rild.libpath "/vendor/lib64/libril-qc-qmi-1.so"
                 setprop vendor.display.lcd_density 560
                 ;;
         esac
@@ -312,6 +312,7 @@ case "$target" in
     "kona")
         case "$soc_hwplatform" in
             *)
+                setprop vendor.media.target_variant "_kona"
                 if [ $fb_width -le 1600 ]; then
                     setprop vendor.display.lcd_density 560
                 else
@@ -321,59 +322,43 @@ case "$target" in
         esac
         ;;
     "lito")
-        case "$soc_hwplatform" in
-            *)
+        case "$soc_hwid" in
+            400|440)
                 sku_ver=`cat /sys/devices/platform/soc/aa00000.qcom,vidc1/sku_version` 2> /dev/null
                 if [ $sku_ver -eq 1 ]; then
                     setprop vendor.media.target.version 1
                 fi
                 ;;
+            434|459)
+                sku_ver=`cat /sys/devices/platform/soc/aa00000.qcom,vidc1/sku_version` 2> /dev/null
+                setprop vendor.media.target.version 2
+                if [ $sku_ver -eq 1 ]; then
+                    setprop vendor.media.target.version 3
+                fi
+                ;;
         esac
         ;;
-    "sdm660")
+    "bengal")
         case "$soc_hwid" in
-           385)
-               setprop vendor.media.target.version 1
+            441)
+                setprop vendor.fastrpc.disable.cdsprpcd.daemon 1
+                setprop vendor.gralloc.disable_ubwc 1
+                ;;
+            471)
+                #scuba APQ
+                setprop vendor.gralloc.disable_ubwc 1
+                ;;
         esac
-        if [ -f /vendor/firmware_mnt/verinfo/ver_info.txt ]; then
-            modem=`cat /vendor/firmware_mnt/verinfo/ver_info.txt |
-                    sed -n 's/^[^:]*modem[^:]*:[[:blank:]]*//p' |
-                    sed 's/.*AT.\(.*\)/\1/g' | cut -d \- -f 1`
-            # In SDM660 if modem version is greater than 3.1, need
-            # to use the new vendor-ril which supports L+L feature
-            # otherwise use the existing old one.
-            zygote=`getprop ro.vendor.zygote`
-            case "$zygote" in
-            "zygote64_32")
-                if [ "$modem" \< "3.1" ]; then
-                    setprop vendor.rild.libpath "/vendor/lib64/libril-qc-qmi-1.so"
-                else
-                    setprop vendor.rild.libpath "/vendor/lib64/libril-qc-hal-qmi.so"
-                fi
-                ;;
-            "zygote32")
-                if [ "$modem" \< "3.1" ]; then
-                    setprop vendor.rild.libpath "/vendor/lib/libril-qc-qmi-1.so"
-                else
-                    setprop vendor.rild.libpath "/vendor/lib/libril-qc-hal-qmi.so"
-                fi
-                ;;
-            esac
-        else
-            zygote=`getprop ro.zygote`
-            case "$zygote" in
-            "zygote64_32")
-                setprop vendor.rild.libpath "/vendor/lib64/libril-qc-qmi-1.so"
-                ;;
-            "zygote32")
-                setprop vendor.rild.libpath "/vendor/lib/libril-qc-qmi-1.so"
-                ;;
-            esac
-        fi
         ;;
     "sdm710" | "msmpeafowl")
         case "$soc_hwplatform" in
             *)
+                if [ $fb_width -le 1600 ]; then
+                    setprop vendor.display.lcd_density 560
+                else
+                    setprop vendor.display.lcd_density 640
+                fi
+
                 sku_ver=`cat /sys/devices/platform/soc/aa00000.qcom,vidc1/sku_version` 2> /dev/null
                 if [ $sku_ver -eq 1 ]; then
                     setprop vendor.media.target.version 1
@@ -393,9 +378,52 @@ case "$target" in
                     setprop vendor.media.target.version 1
                 fi
                 ;;
+    #Set property to differentiate SDM660 & SDM455
+    #SOC ID for SDM455 is 385
+    "sdm660")
+        case "$soc_hwplatform" in
+            *)
+                if [ $fb_width -le 1600 ]; then
+                    setprop vendor.display.lcd_density 560
+                else
+                    setprop vendor.display.lcd_density 640
+                fi
+
+                if [ $soc_hwid -eq 385 ]; then
+                    setprop vendor.media.target.version 1
+                fi
+                ;;
+        esac
+        ;;
+    "lahaina")
+        case "$soc_hwid" in
+            450)
+                setprop vendor.media.target_variant "_shima_v3"
+                sku_ver=`cat /sys/devices/platform/soc/aa00000.qcom,vidc/sku_version` 2> /dev/null
+                if [ $sku_ver -eq 1 ]; then
+                    setprop vendor.media.target_variant "_shima_v1"
+                elif [ $sku_ver -eq 2 ]; then
+                    setprop vendor.media.target_variant "_shima_v2"
+                fi
+                ;;
+            *)
+                setprop vendor.media.target_variant "_lahaina"
+                ;;
+        esac
+        ;;
+    "holi")
+        setprop vendor.media.target_variant "_holi"
+        ;;
 esac
 
 baseband=`getprop ro.baseband`
+#enable atfwd daemon all targets except sda, apq, qcs
+case "$baseband" in
+    "apq" | "sda" | "qcs" )
+        setprop persist.vendor.radio.atfwd.start false;;
+    *)
+        setprop persist.vendor.radio.atfwd.start true;;
+esac
 
 #set default lcd density
 #Since lcd density has read only

@@ -1,5 +1,5 @@
 #!/vendor/bin/sh
-# Copyright (c) 2016, The Linux Foundation. All rights reserved.
+# Copyright (c) 2018, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -28,9 +28,8 @@
 #
 #
 
-while [ "$registeredvendor" != "true" ] && [ "$registered" != "true" ]
+while [ "$registered" != "true" ]
 do
     sleep 0.1
-    registeredvendor="`getprop vendor.sys.listeners.registered`"
-    registered="`getprop sys.listeners.registered`"
+    registered="`getprop vendor.sys.listeners.registered`"
 done

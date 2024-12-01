@@ -1,5 +1,5 @@
 #!/vendor/bin/sh
-# Copyright (c) 2015,2018 The Linux Foundation. All rights reserved.
+# Copyright (c) 2015,2018,2020 The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -32,14 +32,11 @@
 start_sensors()
 {
 
-    chmod -h 664 /persist/sensors/sensors_settings
-    chown -h -R system.system /persist/sensors
+    chmod -h 664 /mnt/vendor/persist/sensors/sensors_settings
+    chown -h -R system.system /mnt/vendor/persist/sensors
     start vendor.sensors.qti
 
-    # Only for SLPI
-    if [ -c /dev/msm_dsps -o -c /dev/sensors ] ; then
-        start vendor.sensors
-    fi
 }
 
 start_sensors
+

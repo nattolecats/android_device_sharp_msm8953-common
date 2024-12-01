@@ -15,7 +15,7 @@
 //
 
 cc_library {
-    name: "libgptutils.sdm660",
+    name: "libgptutils.msm8953",
     vendor: true,
     recovery_available: true,
     shared_libs: [

@@ -139,35 +139,6 @@ start_msm_irqbalance()
 	fi
 }
 
-start_copying_prebuilt_qcril_db()
-{
-    if [ -f /vendor/radio/qcril_database/qcril.db -a ! -f /data/vendor/radio/qcril.db ]; then
-        # [Nokia] - First copy db from the old N path to O path for upgrade
-        if [ -f /data/misc/radio/qcril.db ]; then
-            cp /data/misc/radio/qcril.db /data/vendor/radio/qcril.db
-            # copy the backup db from the old N path to O path for upgrade
-            if [ -f /data/misc/radio/qcril_backup.db ]; then
-                cp /data/misc/radio/qcril_backup.db /data/vendor/radio/qcril_backup.db
-            fi
-            # Now delete the old folder
-            rm -fr /data/misc/radio
-        else
-            cp /vendor/radio/qcril_database/qcril.db /data/vendor/radio/qcril.db
-        fi
-        chown -h radio.radio /data/vendor/radio/qcril.db
-    else
-        # [Nokia] if qcril.db's owner is not radio (e.g. root),
-        # reset it for the recovery
-        qcril_db_owner=`stat -c %U /data/vendor/radio/qcril.db`
-
-        echo "qcril.db's owner is $qcril_db_owner"
-        if [ $qcril_db_owner != "radio" ]; then
-            echo "reset owner to radio for qcril.db"
-            chown -h radio.radio /data/vendor/radio/qcril.db
-        fi
-    fi
-}
-
 baseband=`getprop ro.baseband`
 echo 1 > /proc/sys/net/ipv6/conf/default/accept_ra_defrtr
 
@@ -245,6 +216,25 @@ case "$target" in
         else
              hw_platform=`cat /sys/devices/system/soc/soc0/hw_platform`
         fi
+
+        case "$soc_id" in
+             "317" | "324" | "325" | "326" | "318" | "327" )
+                  case "$hw_platform" in
+                       "Surf")
+                                    setprop qemu.hw.mainkeys 0
+                                    ;;
+                       "MTP")
+                                    setprop qemu.hw.mainkeys 0
+                                    ;;
+                       "RCM")
+                                    setprop qemu.hw.mainkeys 0
+                                    ;;
+                       "QRD")
+                                    setprop qemu.hw.mainkeys 0
+                                    ;;
+                  esac
+                  ;;
+       esac
         start_msm_irqbalance660
         ;;
     "apq8084")
@@ -277,8 +267,28 @@ case "$target" in
         if [ -f /sys/devices/soc0/hw_platform ]; then
              hw_platform=`cat /sys/devices/soc0/hw_platform`
         fi
+        case "$soc_id" in
+             "239")
+                  case "$hw_platform" in
+                       "Surf")
+                            case "$platform_subtype_id" in
+                                 "1")
+                                      setprop qemu.hw.mainkeys 0
+                                      ;;
+                            esac
+                            ;;
+                       "MTP")
+                          case "$platform_subtype_id" in
+                               "3")
+                                    setprop qemu.hw.mainkeys 0
+                                    ;;
+                          esac
+                          ;;
+                  esac
+                  ;;
+        esac
         ;;
-    "msm8994" | "msm8992" | "msm8998" | "apq8098_latv" | "sdm845" | "sdm710" | "qcs605" | "sm6150" | "trinket")
+    "msm8994" | "msm8992" | "msm8998" | "apq8098_latv" | "sdm845" | "sdm710" | "qcs605" | "sm6150" | "trinket" | "bengal")
         start_msm_irqbalance
         ;;
     "msm8996")
@@ -330,6 +340,26 @@ case "$target" in
         else
              hw_platform=`cat /sys/devices/system/soc/soc0/hw_platform`
         fi
+	if [ "$low_ram" != "true" ]; then
+             case "$soc_id" in
+                  "294" | "295" | "303" | "307" | "308" | "309" | "313" | "320" | "353" | "354" | "363" | "364")
+                       case "$hw_platform" in
+                            "Surf")
+                                    setprop qemu.hw.mainkeys 0
+                                    ;;
+                            "MTP")
+                                    setprop qemu.hw.mainkeys 0
+                                    ;;
+                            "RCM")
+                                    setprop qemu.hw.mainkeys 0
+                                    ;;
+                            "QRD")
+                                    setprop qemu.hw.mainkeys 0
+                                    ;;
+                       esac
+                       ;;
+             esac
+        fi
         ;;
     "msm8953")
 	start_msm_irqbalance_8939
@@ -344,6 +374,24 @@ case "$target" in
         else
              hw_platform=`cat /sys/devices/system/soc/soc0/hw_platform`
         fi
+        case "$soc_id" in
+             "293" | "304" | "338" | "351" | "349" | "350" )
+                  case "$hw_platform" in
+                       "Surf")
+                                    setprop qemu.hw.mainkeys 0
+                                    ;;
+                       "MTP")
+                                    setprop qemu.hw.mainkeys 0
+                                    ;;
+                       "RCM")
+                                    setprop qemu.hw.mainkeys 0
+                                    ;;
+                       "QRD")
+                                    setprop qemu.hw.mainkeys 0
+                                    ;;
+                  esac
+                  ;;
+       esac
         ;;
     "sdm710")
         if [ -f /sys/devices/soc0/soc_id ]; then
@@ -357,14 +405,26 @@ case "$target" in
         else
              hw_platform=`cat /sys/devices/system/soc/soc0/hw_platform`
         fi
+        case "$soc_id" in
+             "336" | "337" | "347" | "360" | "393" )
+                  case "$hw_platform" in
+                       "Surf")
+                                    setprop qemu.hw.mainkeys 0
+                                    ;;
+                       "MTP")
+                                    setprop qemu.hw.mainkeys 0
+                                    ;;
+                       "RCM")
+                                    setprop qemu.hw.mainkeys 0
+                                    ;;
+                       "QRD")
+                                    setprop qemu.hw.mainkeys 0
+                                    ;;
+                  esac
+                  ;;
+       esac
         ;;
 esac
-
-#
-# Copy qcril.db if needed for RIL
-#
-start_copying_prebuilt_qcril_db
-echo 1 > /data/vendor/radio/db_check_done
 
 #
 # Make modem config folder and copy firmware config to that folder for RIL
@@ -394,7 +454,11 @@ setprop ro.vendor.ril.mbn_copy_completed 1
 #current default minimum boot-time-default
 buildvariant=`getprop ro.build.type`
 case "$buildvariant" in
-    "user")
+    "userdebug" | "eng")
+        #set default loglevel to KERN_INFO
+        echo "6 6 1 7" > /proc/sys/kernel/printk
+        ;;
+    *)
         #set default loglevel to KERN_WARNING
         echo "4 4 1 4" > /proc/sys/kernel/printk
         ;;

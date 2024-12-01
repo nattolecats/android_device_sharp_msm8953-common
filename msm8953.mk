@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-$(call inherit-product, vendor/nokia/sdm660-common/sdm660-common-vendor.mk)
+$(call inherit-product, vendor/sharp/msm8953-common/msm8953-common-vendor.mk)
 
 # Overlays
 DEVICE_PACKAGE_OVERLAYS += \
@@ -28,10 +28,6 @@ AB_OTA_POSTINSTALL_CONFIG += \
     POSTINSTALL_PATH_system=system/bin/otapreopt_script \
     FILESYSTEM_TYPE_system=ext4 \
     POSTINSTALL_OPTIONAL_system=true
-
-# ANT+
-PRODUCT_PACKAGES += \
-    AntHalService
 
 # Audio
 PRODUCT_PACKAGES += \
@@ -79,8 +75,8 @@ PRODUCT_PACKAGES += \
     android.hardware.boot@1.0-impl \
     android.hardware.boot@1.0-impl.recovery \
     android.hardware.boot@1.0-service \
-    bootctrl.sdm660 \
-    bootctrl.sdm660.recovery
+    bootctrl.msm8953 \
+    bootctrl.msm8953.recovery
 
 PRODUCT_PACKAGES_DEBUG += \
     bootctl
@@ -116,9 +112,9 @@ PRODUCT_PACKAGES += \
     android.hardware.graphics.mapper@2.0-impl \
     android.hardware.memtrack@1.0-impl \
     android.hardware.memtrack@1.0-service \
-    gralloc.sdm660 \
-    hwcomposer.sdm660 \
-    memtrack.sdm660 \
+    gralloc.msm8953 \
+    hwcomposer.msm8953 \
+    memtrack.msm8953 \
     libdisplayconfig \
     libqdMetaData.system \
     libtinyxml
@@ -237,7 +233,7 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     android.hardware.light@2.0-impl \
     android.hardware.light@2.0-service \
-    lights.sdm660
+    lights.msm8953
 
 # Lineage Health
 PRODUCT_PACKAGES += \
@@ -426,8 +422,8 @@ PRODUCT_PACKAGES += \
     android.hardware.weaver@1.0
 
 # VNDK
-PRODUCT_PACKAGES += \
-    libutils-v33
+PRODUCT_COPY_FILES += \
+    prebuilts/vndk/v33/arm64/arch-arm64-armv8-a/shared/vndk-sp/libutils.so:$(TARGET_COPY_OUT_VENDOR)/lib64/libutils-v33.so
 
 # Wifi
 PRODUCT_COPY_FILES += \

@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-PLATFORM_PATH := device/nokia/sdm660-common
+PLATFORM_PATH := device/sharp/msm8953-common
 
 # Platform
 TARGET_ARCH := arm64
@@ -30,7 +30,8 @@ TARGET_2ND_CPU_ABI2 := armeabi
 TARGET_2ND_CPU_VARIANT := generic
 
 BOARD_USES_QCOM_HARDWARE := true
-TARGET_BOARD_PLATFORM := sdm660
+TARGET_BOARD_PLATFORM := msm8953
+TARGET_NO_BOOTLOADER := true
 
 BUILD_BROKEN_DUP_RULES := true
 BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
@@ -46,6 +47,7 @@ BOARD_ANT_WIRELESS_DEVICE := "qualcomm-hidl"
 AB_OTA_PARTITIONS += \
     boot \
     system \
+    product \
     vendor
 
 AB_OTA_UPDATER := true
@@ -72,18 +74,17 @@ DEVICE_MATRIX_FILE := $(PLATFORM_PATH)/compatibility_matrix.xml
 TARGET_FS_CONFIG_GEN := $(PLATFORM_PATH)/config.fs
 
 # Kernel
-BOARD_KERNEL_CMDLINE += console=ttyMSM0,115200,n8 androidboot.console=ttyMSM0
-BOARD_KERNEL_CMDLINE += earlycon=msm_serial_dm,0xc170000 androidboot.hardware=qcom
-BOARD_KERNEL_CMDLINE += msm_rtb.filter=0x37 ehci-hcd.park=3 lpm_levels.sleep_disabled=1
-BOARD_KERNEL_CMDLINE += sched_enable_hmp=1 sched_enable_power_aware=1
-BOARD_KERNEL_CMDLINE += service_locator.enable=1 swiotlb=1 androidboot.configfs=true
-BOARD_KERNEL_CMDLINE += androidboot.usbcontroller=a800000.dwc3 loop.max_part=7
-BOARD_KERNEL_CMDLINE += androidboot.boot_devices=soc/c0c4000.sdhci
-BOARD_KERNEL_BASE := 0x00000000
-BOARD_KERNEL_PAGESIZE := 4096
-BOARD_KERNEL_IMAGE_NAME := Image.gz-dtb
-TARGET_KERNEL_CONFIG := nokia_defconfig
-TARGET_KERNEL_SOURCE := kernel/nokia/sdm660
+BOARD_KERNEL_CMDLINE := console=ttyHSL0,115200,n8 androidboot.console=ttyHSL0 androidboot.hardware=qcom user_debug=30 msm_rtb.filter=0x237 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 androidboot.bootdevice=7824900.sdhci loop.max_part=16
+BOARD_KERNEL_CMDLINE += sched_enable_hmp=1 sched_enable_power_aware=1 app_setting.use_32bit_app_setting=1 kpti=1
+BOARD_KERNEL_CMDLINE += androidboot.boot_devices=soc/7824900.sdhci
+BOARD_KERNEL_BASE := 0x80000000
+BOARD_KERNEL_PAGESIZE := 2048
+BOARD_KERNEL_TAGS_OFFSET := 0x00000100
+BOARD_RAMDISK_OFFSET := 0x01000000
+BOARD_KERNEL_IMAGE_NAME := Image.gz
+TARGET_COMPILE_WITH_MSM_KERNEL := true
+TARGET_KERNEL_CONFIG := zeon_sprout_defconfig
+TARGET_KERNEL_SOURCE := kernel/sharp/zeon_sprout
 TARGET_KERNEL_CLANG_VERSION := r416183b
 TARGET_KERNEL_CLANG_PATH := $(abspath .)/prebuilts/clang/kernel/$(HOST_PREBUILT_TAG)/clang-$(TARGET_KERNEL_CLANG_VERSION)
 TARGET_KERNEL_LLVM_BINUTILS := false
@@ -99,8 +100,9 @@ TARGET_VENDOR_PROP += $(PLATFORM_PATH)/vendor.prop
 # Partitions
 BOARD_USES_SYSTEM_OTHER_ODEX := true
 BOARD_USES_RECOVERY_AS_BOOT := true
+BOARD_PRODUCTIMAGE_FILE_SYSTEM_TYPE := ext4
 BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
-TARGET_COPY_OUT_PRODUCT := system/product
+TARGET_COPY_OUT_PRODUCT := product
 TARGET_COPY_OUT_VENDOR := vendor
 TARGET_NO_RECOVERY := true
 TARGET_USERIMAGES_USE_EXT4 := true
@@ -131,7 +133,7 @@ PRODUCT_PRIVATE_SEPOLICY_DIRS += $(PLATFORM_PATH)/sepolicy/private
 BOARD_VENDOR_SEPOLICY_DIRS += $(PLATFORM_PATH)/sepolicy/vendor
 
 # Vendor Security Patch Level
-VENDOR_SECURITY_PATCH := 2021-04-01
+VENDOR_SECURITY_PATCH := 2021-11-01
 
 # Verity
 # Only needed for signing
@@ -154,4 +156,4 @@ WIFI_HIDL_UNIFIED_SUPPLICANT_SERVICE_RC_ENTRY := true
 WPA_SUPPLICANT_VERSION := VER_0_8_X
 
 # inherit from the proprietary version
-include vendor/nokia/sdm660-common/BoardConfigVendor.mk
+include vendor/sharp/msm8953-common/BoardConfigVendor.mk
