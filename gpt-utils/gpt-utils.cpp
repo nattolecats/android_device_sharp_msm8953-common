@@ -49,7 +49,7 @@
 #include <vector>
 #include <string>
 #define LOG_TAG "gpt-utils"
-#include <log/log.h>
+#include <cutils/log.h>
 #include <cutils/properties.h>
 #include "gpt-utils.h"
 #include <endian.h>
@@ -155,18 +155,11 @@ static int blk_rw(int fd, int rw, int64_t offset, uint8_t *buf, unsigned len)
     else
         r = read(fd, buf, len);
 
-    if (r < 0) {
+    if (r < 0)
         fprintf(stderr, "block dev %s failed: %s\n", rw ? "write" : "read",
                 strerror(errno));
-    } else {
-        if (rw) {
-            r = fsync(fd);
-            if (r < 0)
-                fprintf(stderr, "fsync failed: %s\n", strerror(errno));
-        } else {
-            r = 0;
-        }
-    }
+    else
+        r = 0;
 
     return r;
 }
