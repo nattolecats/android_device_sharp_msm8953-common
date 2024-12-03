@@ -47,7 +47,8 @@ BOARD_ANT_WIRELESS_DEVICE := "qualcomm-hidl"
 AB_OTA_PARTITIONS += \
     boot \
     system \
-    vendor
+    vendor \
+    vbmeta
 
 AB_OTA_UPDATER := true
 
@@ -131,9 +132,9 @@ BOARD_VENDOR_SEPOLICY_DIRS += $(PLATFORM_PATH)/sepolicy/vendor
 # Vendor Security Patch Level
 VENDOR_SECURITY_PATCH := 2021-11-01
 
-# Verity
-# Only needed for signing
-BOARD_AVB_ENABLE := false
+# Verified Boot
+BOARD_AVB_ENABLE := true
+BOARD_AVB_MAKE_VBMETA_IMAGE_ARGS += --flags 2
 
 # VNDK
 BOARD_VNDK_VERSION := current
