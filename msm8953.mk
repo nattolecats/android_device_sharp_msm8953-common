@@ -130,10 +130,6 @@ PRODUCT_VENDOR_PROPERTIES += \
 endif
 endif
 
-# Fingerprint
-PRODUCT_PACKAGES += \
-    android.hardware.biometrics.fingerprint-service.xiaomi
-
 # FM
 PRODUCT_PACKAGES += \
     FMRadio \
@@ -180,10 +176,6 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     ipacm \
     IPACM_cfg.xml
-
-# Lights
-PRODUCT_PACKAGES += \
-    android.hardware.light-service.xiaomi
 
 # LiveDisplay
 PRODUCT_PACKAGES += \
