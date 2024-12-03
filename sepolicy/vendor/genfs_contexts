@@ -1,17 +1,36 @@
-# /proc/devmodel - Sensors
-genfscon proc /devmodel u:object_r:proc_fih:s0
+# Boot reason
+genfscon proc  /sys/kernel/boot_reason   u:object_r:proc_boot_reason:s0
 
-# /proc/bandinfo - Radio
-genfscon proc /bandinfo            u:object_r:proc_bandinfo:s0
+# Leds
+genfscon sysfs /devices/platform/soc/200f000.qcom,spmi/spmi-0/spmi0-00/200f000.qcom,spmi:qcom,pm8953@0:qcom,leds@a100 u:object_r:sysfs_leds:s0
+genfscon sysfs /devices/platform/soc/78b6000.i2c/i2c-2/2-0045/leds/ u:object_r:sysfs_leds:s0
 
-# /proc/AllHWLis/* - Gestures
-genfscon proc /AllHWList/tp_double_tap   u:object_r:proc_fih:s0
+# Power
+genfscon sysfs /devices/soc/soc:qcom,bcl/power_supply                u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/soc/msm-bcl-21/power_supply                  u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/soc/qpnp-typec-9/power_supply                  u:object_r:sysfs_batteryinfo:s0
+genfscon sysfs /devices/platform/soc/200f000.qcom,spmi/spmi-0/spmi0-02/200f000.qcom,spmi:qcom,pmi8950@2:vadc@3100 u:object_r:sysfs_battery_supply:s0
+genfscon sysfs /devices/platform/soc/200f000.qcom,spmi/spmi-0/spmi0-02/200f000.qcom,spmi:qcom,pmi8940@2:vadc@3100 u:object_r:sysfs_battery_supply:s0
 
-# /proc/hwmodel - Model
-genfscon proc /hwmodel            u:object_r:proc_fih:s0
+# Extcon
+genfscon sysfs /devices/platform/soc/200f000.qcom,spmi/spmi-0/spmi0-02/200f000.qcom,spmi:qcom,pmi8950@2:qcom,qpnp-smbcharger/extcon u:object_r:sysfs_extcon:s0
+genfscon sysfs /devices/platform/soc/200f000.qcom,spmi/spmi-0/spmi0-02/200f000.qcom,spmi:qcom,pmi8940@2:qcom,qpnp-smbcharger/extcon u:object_r:sysfs_extcon:s0
+genfscon sysfs /devices/platform/soc/soc:qcom,mdss_wb_panel/extcon u:object_r:sysfs_extcon:s0
 
-# /proc/baseband - Baseband
-genfscon proc /baseband            u:object_r:proc_fih:s0
+# Mmc
+genfscon sysfs /devices/platform/soc/7824900.sdhci/mmc_host/mmc0/mmc0:0001/block/mmcblk0/queue/discard_max_bytes u:object_r:sysfs_mmc_host:s0
 
-# /proc/bt_mac - MAC addr
-genfscon proc /bt_mac            u:object_r:proc_fih:s0
+# Rmt
+userdebug_or_eng(`
+  genfscon debugfs /rmt_storage	u:object_r:debugfs_rmt:s0
+')
+
+# Time
+genfscon sysfs /devices/platform/soc/200f000.qcom,spmi/spmi-0/spmi0-00/200f000.qcom,spmi:qcom,pm8953@0:qcom,pm8953_rtc/rtc/rtc0/since_epoch u:object_r:sysfs_rtc:s0
+
+# Touchscreen
+genfscon proc /touchpanel	u:object_r:proc_touchpanel:s0
+genfscon sysfs /touchpanel	u:object_r:proc_touchpanel:s0
+
+# Vibrator
+genfscon sysfs /devices/platform/soc/200f000.qcom,spmi/spmi-0/spmi0-03/200f000.qcom,spmi:qcom,pmi8940@3:qcom,haptics@c000/leds/vibrator	u:object_r:sysfs_leds:s0

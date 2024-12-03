@@ -1,3 +1,5 @@
-allow ueventd self:capability sys_nice;
+typeattribute ueventd data_between_core_and_vendor_violators;
 
-allow ueventd sysfs_fingerprint:chr_file { create setattr rw_file_perms };
+allow ueventd fingerprint_sysfs:file rw_file_perms;
+allow ueventd wifi_vendor_data_file:dir r_dir_perms;
+allow ueventd wifi_vendor_data_file:file r_file_perms;

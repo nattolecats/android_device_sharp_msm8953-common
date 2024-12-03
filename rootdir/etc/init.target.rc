@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2015, 2018,2020 The Linux Foundation. All rights reserved.
+# Copyright (c) 2013-2017, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -26,92 +26,36 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 #
-
-#import init.carrier.rc
-
-on lkm-preload-done
-    exec u:r:vendor_modprobe:s0 -- /vendor/bin/modprobe -a -d /vendor/lib/modules audio_apr audio_adsp_loader audio_q6_notifier audio_q6 audio_usf audio_native audio_pinctrl_wcd audio_swr audio_platform audio_swr_ctrl audio_hdmi audio_wcd9xxx audio_wcd_core audio_wsa881x_analog audio_wsa881x audio_mbhc audio_stub audio_digital_cdc audio_analog_cdc audio_wcd_cpe audio_cpe_lsm audio_wcd9335 audio_machine_sdm450 audio_machine_ext_sdm450
-
 on early-init
     write /proc/sys/kernel/sched_boost 1
-    mkdir /firmware 0771 system system
-    mkdir /system 0777 root root
-    mkdir /bt_firmware 0771 system system
     symlink /data/tombstones /tombstones
-    mkdir /dsp 0771 media media
-
-# SHARP_EXTEND filesystem mod start
-    mkdir /tombstones 0771 system system
-    mkdir /durable 0711 root root
-    mkdir /diagapp
-    mkdir /carrier
-    mkdir /kitting
-# SHARP_EXTEND filesystem mod end
 
 on fs
-    exec - system system -- /vendor/bin/init.shdiag.keymaster.sh
     wait /dev/block/platform/soc/${ro.boot.bootdevice}
     symlink /dev/block/platform/soc/${ro.boot.bootdevice} /dev/block/bootdevice
-
     mount_all /vendor/etc/fstab.qcom
-    write /proc/sys/vm/swappiness 100
 
-# SHARP_EXTEND filesystem mod start
     chown root system /mnt/vendor/persist
     chmod 0771 /mnt/vendor/persist
     mkdir /mnt/vendor/persist/data 0700 system system
     mkdir /mnt/vendor/persist/bms 0700 root system
     restorecon_recursive /mnt/vendor/persist
-    #mkdir /persist/data 0700 system system
-    #mkdir /persist/bms 0700 root system
-    #restorecon_recursive /persist
 
-    #write /sys/kernel/boot_adsp/boot 1
-
-    #wait /dev/block/bootdevice/by-name/oem
-    #mount ext4 /dev/block/bootdevice/by-name/oem /oem ro nosuid nodev barrier=1
-
-    chown system system /tombstones
-    chmod 0771 /tombstones
-
-    chown root root /durable
-    chmod 0711 /durable
-
-    chown system system /carrier
-    chmod 0771 /carrier
-    restorecon_recursive /carrier
-# SHARP_EXTEND filesystem mod end
-
-# SHARP_EXTEND For SHPWR add Start
-    mkdir /durable/shpwr 0755 root root
-# SHARP_EXTEND For SHPWR add End
-
-on post-fs
-    start vendor.qseecomd
-    exec - system system -- /vendor/bin/init.qti.qseecomd.sh
-    write /dev/ipa 1
+on init
+    write /dev/stune/foreground/schedtune.sched_boost_no_override 1
+    write /dev/stune/top-app/schedtune.sched_boost_no_override 1
+    write /dev/stune/schedtune.colocate 0
+    write /dev/stune/background/schedtune.colocate 0
+    write /dev/stune/foreground/schedtune.colocate 0
+    write /dev/stune/top-app/schedtune.colocate 1
+    write /sys/module/qpnp_rtc/parameters/poweron_alarm 1
 
 on post-fs
     # set RLIMIT_MEMLOCK to 64MB
     setrlimit 8 67108864 67108864
-
-    # Create the lost+found directories, so as to set context(prevent unlabeled).
-    mkdir /tombstones/lost+found 0770 root root
-    mkdir /durable/lost+found 0770 root root
-    mkdir /diagapp/lost+found 0770 root root
-    mkdir /carrier/lost+found 0770 root root
-    restorecon_recursive /tombstones
-    restorecon_recursive /durable
-    restorecon_recursive /diagapp
-    restorecon_recursive /carrier
-
-# SHARP_EXTEND For SHPWR add Start
-    write /sys/module/shpwr_log/parameters/durable_shpwr_initialized 1
-# SHARP_EXTEND For SHPWR add End
-
-# SHARP_EXTEND Kitting Add-Start
-    mkdir /kitting/lost+found 0770 root root
-# SHARP_EXTEND Kitting Add-End
+    start vendor.qseecomd
+    wait_for_prop vendor.sys.listeners.registered true
+    write /dev/ipa 1
 
 on post-fs-data
     mkdir /data/tombstones 0771 system system
@@ -121,117 +65,47 @@ on post-fs-data
     mkdir /tombstones/dsps 0771 system system
     mkdir /persist/data/sfs 0700 system system
     mkdir /persist/data/tz 0700 system system
-    mkdir /data/misc/dts 0770 media audio
-    mkdir /data/vendor/hbtp 0750 system system
-
-# SHARP_EXTEND bugfix for adaptable storage start
-    setprop ro.crypto.volume.contents_mode "aes-256-xts"
-    setprop ro.crypto.volume.filenames_mode "aes-256-cts"
-# SHARP_EXTEND bugfix for adaptable storage end
-
-# SHARP_EXTEND Kitting Add-Start
-    mkdir /data/misc/kitting 0770 system system
-
-    chown system system /kitting
-    chmod 0775 /kitting
-    restorecon_recursive /kitting
-# SHARP_EXTEND Kitting Add-End
+    mkdir /persist/qti_fp 0700 system system
+    mkdir /data/misc/seemp 0700 system system
+    mkdir /data/misc/audio_pp 0771 media audio
 
 #Create folder for mm-qcamera-daemon
-    mkdir /data/vendor/camera 0770 camera camera
-
-on early-boot
-    chown system system /mnt/vendor/persist/sensors
-    chown system system /mnt/vendor/persist/sensors/sns.reg
-    chown system system /mnt/vendor/persist/sensors/sensors_list.txt
-    chown system system /mnt/vendor/persist/sensors/registry
-    chown system system /mnt/vendor/persist/sensors/registry/registry
-    chown system system /mnt/vendor/persist/sensors/registry/registry/sensors_registry
-    chown system system /mnt/vendor/persist/sensors/sensors_settings
-    chown system system /mnt/vendor/persist/sensors/registry/sns_reg_config
-    chown system system /mnt/vendor/persist/sensors/registry/sns_reg_version
-    chown system system /mnt/vendor/persist/sensors/registry/config
-    chmod 0664 /mnt/vendor/persist/sensors/sensors_settings
+mkdir /data/vendor/camera 0770 camera camera
+mkdir /data/misc/camera 0770 camera camera
 
 #start camera server as daemon
 service qcamerasvr /system/vendor/bin/mm-qcamera-daemon
-    class late_start
+    class main
     user camera
     group camera system inet input graphics
+    task_profiles ServiceCapacityLow
 
-on init
-    write /dev/stune/foreground/schedtune.sched_boost_no_override 1
-    write /dev/stune/top-app/schedtune.sched_boost_no_override 1
-    write /dev/stune/schedtune.colocate 0
-    write /dev/stune/background/schedtune.colocate 0
-    write /dev/stune/foreground/schedtune.colocate 0
-    write /dev/stune/top-app/schedtune.colocate 1
-# SHARP_EXTENDED for disabling AlarmBoot Start
-#    write /sys/module/qpnp_rtc/parameters/poweron_alarm 1
-    write /sys/module/qpnp_rtc/parameters/poweron_alarm 0
-# SHARP_EXTENDED for disabling AlarmBoot End
+#Start up peripheral manager
+service vendor.per_mgr /vendor/bin/pm-service
+    class core
+    user system
+    group system
+    ioprio rt 4
+    task_profiles ServiceCapacityLow
 
-# SHARP_EXTEND for SSR Dump Start
-    # 0: kgsl-hyp, 1: venus, 2: lpass, 3: pronto, 4: mss
-    write /sys/bus/msm_subsys/devices/subsys0/restart_level RELATED
-    write /sys/bus/msm_subsys/devices/subsys1/restart_level RELATED
-    write /sys/bus/msm_subsys/devices/subsys2/restart_level RELATED
-    write /sys/bus/msm_subsys/devices/subsys3/restart_level RELATED
-    write /sys/bus/msm_subsys/devices/subsys4/restart_level RELATED
-    write /sys/module/subsystem_restart/parameters/enable_ramdumps 1
-# SHARP_EXTEND for SSR Dump End
+service vendor.per_proxy /vendor/bin/pm-proxy
+    class core
+    user system
+    group system
+    disabled
+    task_profiles ServiceCapacityLow
 
-service qfp-daemon /system/vendor/bin/qfp-daemon
-   class late_start
-   user system
-   group system drmrpc
+on property:init.svc.vendor.per_mgr=running
+    start vendor.per_proxy
 
-# Allow usb charging to be disabled peristently
-# SHARP_EXTEND For SHPWR mod Start
-on property:persist.vendor.usb.chgdisabled=1
-    write /sys/class/power_supply/battery/input_suspend 1
-
-on property:persist.vendor.usb.chgdisabled=0
-    write /sys/class/power_supply/battery/input_suspend 0
-# SHARP_EXTEND For SHPWR mod End
-
-# SHARP_EXTEND For SHPWR add Start
-on property:persist.vendor.shbatt.shutdowndisabled=1
-    write /sys/class/power_supply/battery/capacity 50
-
-#typec-charger safety features disable for sharp battery
-on property:persist.vendor.shbatt.safetydisabled=1
-    write /sys/module/qpnp_smb5/parameters/debug_usb_therm 25
-
-#typec-charger safety features enable for sharp battery
-on property:persist.vendor.shbatt.safetydisabled=0
-    write /sys/module/qpnp_smb5/parameters/debug_usb_therm 0
-# SHARP_EXTEND For SHPWR add End
-
-service qrngd /system/bin/qrngd -f
-   class main
-   user root
-   group root
-
-service qrngp /system/bin/qrngp -f
-   class main
-   user root
-   group root
-   oneshot
-   disabled
-
-on property:sys.boot_completed=1
-   start qrngp
+on property:sys.shutdown.requested=*
+    stop vendor.per_proxy
 
 service vendor.qseecomd /vendor/bin/qseecomd
    class core
    user root
    group root
-
-#service aostlmd /system/bin/aostlmd
-#   class late_start
-#   user system
-#   group system net_raw
+   task_profiles ServiceCapacityLow
 
 service thermal-engine /system/vendor/bin/thermal-engine
    class main
@@ -241,74 +115,12 @@ service thermal-engine /system/vendor/bin/thermal-engine
    socket thermal-recv-passive-client stream 0666 system system
    socket thermal-send-rule stream 0660 system system
    group root
-#SHARP_EXTEND Power-Saving add start
-   critical
-#SHARP_EXTEND Power-Saving add end
+   task_profiles ServiceCapacityLow
 
-service audiod /system/vendor/bin/audiod
-   class late_start
-   user system
-   group system
-
-on boot
-    start rmt_storage
-    insmod /system/lib/modules/adsprpc.ko
-# access permission for secure touch
-    chmod 0660 /sys/devices/soc.0/78b7000.i2c/i2c-3/3-0020/input/input0/secure_touch_enable
-    chmod 0440 /sys/devices/soc.0/78b7000.i2c/i2c-3/3-0020/input/input0/secure_touch
-    chmod 0660 /sys/devices/soc.0/78b8000.i2c/i2c-4/4-0020/input/input0/secure_touch_enable
-    chmod 0440 /sys/devices/soc.0/78b8000.i2c/i2c-4/4-0020/input/input0/secure_touch
-    chown system drmrpc /sys/devices/soc.0/78b7000.i2c/i2c-3/3-0020/input/input0/secure_touch_enable
-    chown system drmrpc /sys/devices/soc.0/78b7000.i2c/i2c-3/3-0020/input/input0/secure_touch
-    chown system drmrpc /sys/devices/soc.0/78b8000.i2c/i2c-4/4-0020/input/input0/secure_touch_enable
-    chown system drmrpc /sys/devices/soc.0/78b8000.i2c/i2c-4/4-0020/input/input0/secure_touch
-    chown system system /sys/kernel/hbtp/display_pwr
-
-# Add a cpuset for the camera daemon
-# We want all cores for camera
-    mkdir /dev/cpuset/camera-daemon
-    write /dev/cpuset/camera-daemon/cpus 0-3
-    write /dev/cpuset/camera-daemon/mems 0
-    chown cameraserver cameraserver /dev/cpuset/camera-daemon
-    chown cameraserver cameraserver /dev/cpuset/camera-daemon/tasks
-    chmod 0660 /dev/cpuset/camera-daemon/tasks
-
-    ####Regionalization config and prop files####
-    chmod 0644 /persist/speccfg/spec
-    chmod 0644 /persist/speccfg/devicetype
-    chmod 0644 /persist/speccfg/mbnversion
-    chmod 0644 /persist/speccfg/.not_triggered
-    chmod 0644 /persist/speccfg/vendor_ro.prop
-    chmod 0644 /persist/speccfg/vendor_persist.prop
-    chmod 0644 /persist/speccfg/submask
-    chmod 0644 /persist/speccfg/partition
-    chown system system /persist/speccfg/spec
-    chown system system /persist/speccfg/devicetype
-    chown system system /persist/speccfg/mbnversion
-    chown system system /persist/speccfg/.not_triggered
-    chown system system /persist/speccfg/vendor_ro.prop
-    chown system system /persist/speccfg/vendor_persist.prop
-    chown system system /persist/speccfg/submask
-    chown system system /persist/speccfg/partition
-
-# access permission for wlan
-    chown system system /mnt/vendor/persist/WCNSS_qcom_wlan_nv.bin
-
-#USB controller configuration
-    write /sys/module/g_android/parameters/mtp_tx_req_len 131072
-    write /sys/module/g_android/parameters/mtp_rx_req_len 131072
-    write /sys/class/android_usb/android0/f_rndis_qc/rndis_transports BAM2BAM_IPA
-    setprop vendor.usb.rndis.func.name "rndis_bam"
-    setprop vendor.usb.rmnet.func.name "rmnet_bam"
-    setprop vendor.usb.rmnet.inst.name "rmnet"
-    setprop vendor.usb.dpl.inst.name "dpl"
-
-# SHARP_EXTEND For SHPWR add Start
-    chown root system /sys/module/qpnp_smb5/parameters/param_dtv_limit_voltage
-# SHARP_EXTEND For SHPWR add End
-
-    # Backup recovery log
-    mkdir /durable/recovery_log 0700 root root
+service adsprpcd /system/vendor/bin/adsprpcd
+   class main
+   user media
+   group media
 
 service wcnss-service /system/vendor/bin/wcnss_service
     class main
@@ -316,18 +128,38 @@ service wcnss-service /system/vendor/bin/wcnss_service
     group system wifi radio
     oneshot
 
-service hbtp /system/vendor/bin/hbtp_daemon
+service vendor.imsqmidaemon /system/vendor/bin/imsqmidaemon
     class main
     user system
-    group system
+    socket ims_qmid stream 0660 system radio
+    group radio log diag
+    task_profiles ServiceCapacityLow
+
+service vendor.imsdatadaemon /system/vendor/bin/imsdatadaemon
+    class main
+    user system
+    socket ims_datad stream 0660 system radio
+    group system wifi radio inet log diag
+    task_profiles ServiceCapacityLow
     disabled
 
-service ppd /system/vendor/bin/mm-pp-dpps
-    class late_start
-    disabled
-    user system
-    socket pps stream 0660 system system
-    group system graphics
+on property:vendor.ims.QMI_DAEMON_STATUS=1
+    start vendor.imsdatadaemon
+
+service vendor.ims_rtp_daemon /system/vendor/bin/ims_rtp_daemon
+   class main
+   user system
+   group radio diag inet log
+   task_profiles ServiceCapacityLow
+
+service vendor.imsrcsservice /system/vendor/bin/imsrcsd
+   class main
+   user system
+   group radio diag inet log wakelock
+   task_profiles ServiceCapacityLow
+
+on property:vendor.ims.DATA_DAEMON_STATUS=1
+   restart vendor.ims_rtp_daemon
 
 on property:init.svc.surfaceflinger=stopped
     stop ppd
@@ -347,90 +179,68 @@ on property:init.svc.zygote=running
 on property:init.svc.zygote=restarting
     stop ppd
 
-on charger
-    wait /dev/block/by-name/durable
-    mount ext4 /dev/block/by-name/durable /durable nosuid nodev barrier=1
-    setprop sys.usb.configfs 1 
-    start qcom-post-boot
-    setprop persist.sys.usb.config mass_storage
-    start vendor.hvdcp_opti
-    start thermal-engine
-
-# SHARP_EXTEND For SHPWR add Start
-    write /sys/module/qpnp_smb5/parameters/param_offcharge_mode 1
-    write /sys/module/shpwr_log/parameters/durable_shpwr_initialized 1
-# SHARP_EXTEND For SHPWR add End
-
-service dts_configurator /system/vendor/bin/dts_configurator
-    class late_start
-    user system
-    group media audio
-    oneshot
-
-service dtseagleservice /system/vendor/bin/dts_eagle_service
-    class late_start
-    user system
-    group audio media
-    disabled
-
-#service adsprpcd /system/vendor/bin/adsprpcd
-#    class main
-#    user media
-#    group media
-
 service vendor.hvdcp_opti /system/vendor/bin/hvdcp_opti
-   class main
-   user root
-   group system wakelock
-
-on property:init.svc.dts_configurator=stopped
-    start dtseagleservice
-
-service vendor.per_mgr /system/vendor/bin/pm-service
-    class core
-    user system
-    group system net_raw
-
-service vendor.per_proxy /system/vendor/bin/pm-proxy
-    class core
-    user system
-    group system
-    disabled
-
-on property:init.svc.vendor.per_mgr=running
-    start vendor.per_proxy
-
-on property:sys.shutdown.requested=*
-    stop vendor.per_proxy
-
-service energy-awareness /system/vendor/bin/energy-awareness
     class main
     user root
+    group system wakelock
+
+service vendor.power_off_alarm /vendor/bin/power_off_alarm
+    class core
     group system
+    disabled
     oneshot
 
-service mdtpd /system/vendor/bin/mdtpd
+on charger
+    write /sys/devices/system/cpu/cpu2/online 0
+    write /sys/devices/system/cpu/cpu3/online 0
+    write /sys/module/lpm_levels/parameters/sleep_disabled 0
+    start vendor.hvdcp_opti
+    start vendor.power_off_alarm
+    start thermal-engine
+
+on boot
+    chown system system /sys/kernel/hbtp/display_pwr
+
+# access permission for wlan
+    chown system system /mnt/vendor/persist/WCNSS_qcom_wlan_nv.bin
+
+#USB controller configuration
+    write /sys/module/g_android/parameters/mtp_tx_req_len 131072
+    write /sys/module/g_android/parameters/mtp_rx_req_len 131072
+    write /sys/class/android_usb/android0/f_rndis_qc/rndis_transports BAM2BAM_IPA
+    setprop vendor.usb.rndis.func.name "rndis_bam"
+    setprop vendor.usb.rmnet.func.name "rmnet_bam"
+    setprop vendor.usb.rmnet.inst.name "rmnet"
+    setprop vendor.usb.dpl.inst.name "dpl"
+
+    # Add for DT2W
+    chown system system /sys/touchpanel/double_tap
+    chown system system /proc/touchpanel/wakeup_gesture
+    chmod 0660 /proc/touchpanel/wakeup_gesture
+
+    # add for goodix 
+    chown system system /dev/goodix_fp
+    chmod 0644 /dev/goodix_fp
+
+    # add for fpc 
+    chown system system /sys/devices/platform/soc/soc:fpc1020/compatible_all
+    chmod 0664 /sys/devices/platform/soc/soc:fpc1020/compatible_all
+    chown system system /sys/devices/platform/soc/soc:fpc1020/irq
+    chmod 0660 /sys/devices/platform/soc/soc:fpc1020/irq
+    chown system system /sys/devices/platform/soc/soc:fpc1020/hw_reset
+    chmod 0660 /sys/devices/platform/soc/soc:fpc1020/hw_reset
+    chown system system /sys/devices/platform/soc/soc:fpc1020/wakeup_enable
+    chmod 0660 /sys/devices/platform/soc/soc:fpc1020/wakeup_enable
+    chown system system /sys/devices/platform/soc/soc:fpc1020/fingerdown_wait
+    chmod 0660 /sys/devices/platform/soc/soc:fpc1020/fingerdown_wait
+
+on post-fs-data
+    mkdir /data/vendor/goodix 0770 system system
+    mkdir /data/vendor/fpc 0770 system system
+
+service ppd /vendor/bin/mm-pp-dpps
     class late_start
-    user root
-    group system radio drmrpc
-
-on boot
-    write /sys/devices/soc.0/78b8000.i2c/i2c-4/4-0020/input/input0/fw_name PR1702898-s3528t_00260005_00380008.img
-    write /sys/devices/soc.0/78b8000.i2c/i2c-4/4-0020/input/input0/update_fw 1
-
-on boot
-    chown system system /sys/class/leds/red/blink
-    chown system system /sys/class/leds/red/breath
-    chown system system /sys/class/leds/red/delay_on
-    chown system system /sys/class/leds/red/delay_off
-    chown system system /sys/class/leds/green/blink
-    chown system system /sys/class/leds/green/breath
-    chown system system /sys/class/leds/green/delay_on
-    chown system system /sys/class/leds/green/delay_off
-    chown system system /sys/class/leds/blue/blink
-    chown system system /sys/class/leds/blue/breath
-    chown system system /sys/class/leds/blue/delay_on
-    chown system system /sys/class/leds/blue/delay_off
-
-
-    
+    user system
+    group system graphics
+    socket pps stream 0660 system system
+    disabled
