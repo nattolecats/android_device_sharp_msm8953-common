@@ -89,6 +89,9 @@ TARGET_KERNEL_LLVM_BINUTILS := false
 TARGET_KERNEL_ADDITIONAL_FLAGS := \
     HOSTCFLAGS="-fuse-ld=lld -Wno-unused-command-line-argument"
 
+BOARD_CUSTOM_BOOTIMG := true
+BOARD_CUSTOM_BOOTIMG_MK := $(PLATFORM_PATH)/mkbootimg.mk
+
 # Properties
 TARGET_ODM_PROP += $(PLATFORM_PATH)/odm.prop
 TARGET_PRODUCT_PROP += $(PLATFORM_PATH)/product.prop
